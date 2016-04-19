@@ -14,10 +14,12 @@ class ReversiClient(PlayReversi):
     }
 
     _searcher = None
+    _player = 1
 
-    def __init__(self, searcher):
+    def __init__(self, searcher, player):
         super(ReversiClient, self).__init__()
         self._searcher = searcher
+        self._player = player
 
     def make_a_move(self, updated_board):
         board = copy(updated_board)
@@ -26,7 +28,7 @@ class ReversiClient(PlayReversi):
                 temp = board[i][j]
                 board[i][j] = self.map_function[temp]
         current_node = Node(board)
-        heuristic, move = self._searcher.search(current_node, 4, -1)
+        heuristic, move = self._searcher.search(current_node, 4, self._player)
         return {'X': move[1], 'Y': move[0]}
 
     def update_board(self, updated_board):
@@ -38,5 +40,5 @@ if __name__ == "__main__":
     heuristic = DummyHeuristic()
     begin = Node.create()
     searcher = MinMaxSearcher(heuristic)
-    handler = ReversiClient(searcher)
+    handler = ReversiClient(searcher, -1)
     play(handler)
