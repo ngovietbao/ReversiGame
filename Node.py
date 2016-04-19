@@ -1,17 +1,21 @@
-from copy import copy, deepcopy
+from copy import deepcopy
 
+node_counter = 0
 
 class Node(object):
-    """ This is class declare a state of game Reversi """
+    """ This is class declare a state of game Revesi """
+    PLAYER_1 = 1  # Your turn
+    PLAYER_2 = -1  # Enemy turn
 
-    __player1 = 0
-    __player2 = 0
-    __is_player1_turn = True
+    _current_turn = PLAYER_1
 
     def __init__(self, board, parent=None):
         """ Constructor for node class """
         self.board = deepcopy(board)
         self.parent = parent
+        global node_counter
+        node_counter += 1
+        print node_counter
 
     def __eq__(self, other):
         """ Implement fast compare two state is equal or not """
@@ -81,7 +85,7 @@ class Node(object):
         :param player: move of @player
         :param x: x-position of given move
         :param y: y-position of given move
-        :return: Node if given move is valid, False if move is invalid
+        :return: Node if given move is valid, None if move is invalid
         """
 
         def check_direction(x, y, i, j):
@@ -114,7 +118,7 @@ class Node(object):
                             x -= i
                             y -= j
                         return Node(board, self)
-            return False
+            return None
 
         # Check over 8 direction by change (i, j) value
         for i in (-1, 0, 1):
@@ -123,20 +127,20 @@ class Node(object):
                     result = check_direction(x, y, i, j)
                     if result:
                         return result
-        return False
+        return None
 
     def get_all_valid_moves(self, player):
         """
         Get all valid moves of player
         :param player: ID of player
-        :return: a list of Node contains all valid moves
+        :return: a dictionary (Key is moves and Value is Node after that move) contains all valid moves
         """
-        move_lists = []
+        move_lists = {}
         for i in range(8):
             for j in range(8):
                 result = self.get_move(player, i, j)
                 if self.board[i][j] == 0 and result:
-                    move_lists.append(result)
+                    move_lists[(i, j)] = result
         return move_lists
 
     def get_number_valid_moves(self):
@@ -155,11 +159,12 @@ class Node(object):
                     score += 1
         return score
 
-    def get_turn(self):
-        if self.__is_player1_turn:
-            return 1
-        else:
-            return 2
+    def get_current_turn(self):
+        """
+        Get turn
+        :return: Current turn of this node
+        """
+        return self._current_turn
 
     @staticmethod
     def create():
@@ -169,8 +174,8 @@ class Node(object):
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 2, 0, 0, 0],
-            [0, 0, 0, 2, 1, 0, 0, 0],
+            [0, 0, 0, 1, -1, 0, 0, 0],
+            [0, 0, 0, -1, 1, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0]
