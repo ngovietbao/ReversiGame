@@ -1,0 +1,2 @@
+# ReversiGame
+This dummy version
