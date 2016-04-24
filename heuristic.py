@@ -155,7 +155,7 @@ class heuristic(AbstractHeuristic):
         We: Player_1
         Opp: Player-2
         """
-        return node.get_score(node.PLAYER_2) - node.get_score(node.PLAYER_1)
+        return node.get_score(node.PLAYER_1) - node.get_score(node.PLAYER_2)
 
     def eval(self, node):
         n = node.get_score(node.PLAYER_1) + node.get_score(node.PLAYER_2)
