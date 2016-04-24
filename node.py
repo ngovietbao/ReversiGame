@@ -11,8 +11,9 @@ class Node(object):
 
     def __init__(self, board, parent=None):
         """ Constructor for node class """
-        self.board = deepcopy(board)
-        self.parent = parent
+        if board is not None:
+            self.board = [row[:] for row in board]
+            self.parent = parent
         #global node_counter
         #node_counter += 1
         #print(node_counter)
@@ -38,7 +39,7 @@ class Node(object):
         tostring = "\n".join([str(i) for i in self.board])
         return tostring
 
-    def is_valid_move(self, player, x, y):
+    def __is_valid_move(self, player, x, y):
         """
         Check if given move is valid or not
         :param player: move of @player
@@ -79,7 +80,7 @@ class Node(object):
                     return True
         return False
 
-    def get_move(self, player, x, y):
+    def __get_move(self, player, x, y):
         """
         Get the Node state if given move is valid
         :param player: move of @player
@@ -138,12 +139,12 @@ class Node(object):
         move_lists = {}
         for i in range(8):
             for j in range(8):
-                result = self.get_move(player, i, j)
+                result = self.__get_move(player, i, j)
                 if self.board[i][j] == 0 and result:
                     move_lists[(i, j)] = result
         return move_lists
 
-    def get_number_valid_moves(self):
+    def __get_number_valid_moves(self):
         # No need, use length of list returned by get_all_valid_moves func
         pass
 
