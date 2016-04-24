@@ -43,13 +43,21 @@ class MinMaxSearcher(AbstractSearcher):
         lst = [i for i in valid_moves.values()]
 
         # Get max value of child node
-        max, moving = 0, None
+        max, moving = -165, None
         for mov, new_node in valid_moves.iteritems():
+            # print 2 test
+            print mov
+            print(' has child: ')
+            # aaa
             result = self.search(new_node, depth - 1, -player)
             value = player * result[0]  # Value of this node
+            print mov
+            print value
             if value >= max:
                 max, moving = value, mov
         # Get how to move return this node
+        #print(max)
+        #print(moving)
         return max * player, moving
 
 

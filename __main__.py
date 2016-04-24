@@ -1,10 +1,10 @@
 from copy import copy
 
 from abstract_heuristic import DummyHeuristic
-from node import *
+from Node import *
 from reversi_client import *
 from searcher import *
-
+from heuristic import *
 
 class ReversiClient(PlayReversi):
     map_function = {
@@ -28,16 +28,17 @@ class ReversiClient(PlayReversi):
                 temp = board[i][j]
                 board[i][j] = self.map_function[temp]
         current_node = Node(board)
-        heuristic, move = self._searcher.search(current_node, 4, self._player)
+        heuristic, move = self._searcher.search(current_node, 5, self._player)
         return {'X': move[1], 'Y': move[0]}
 
     def update_board(self, updated_board):
-        print updated_board.__str__()
+        print (updated_board.__str__())
         super(ReversiClient, self).update_board(updated_board)
 
 
 if __name__ == "__main__":
-    heuristic = DummyHeuristic()
+    #heuristic = DummyHeuristic()
+    heuristic = heuristic()
     begin = Node.create()
     searcher = MinMaxSearcher(heuristic)
     handler = ReversiClient(searcher, -1)
