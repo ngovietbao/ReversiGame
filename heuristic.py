@@ -148,21 +148,21 @@ class heuristic(AbstractHeuristic):
                         else:
                             opp_not_safe += 1  # = opp_not_safe + 1
         res = 2*my_safe + my_not_safe - 2*opp_safe - opp_not_safe
-        return -res
+        return res
 
-    def eval_late_game(self,node):
+    def eval_late_game(self, node):
         """ return the score of a node in late game
-        We: Player_2
-        Opp: Player-1
+        We: Player_1
+        Opp: Player-2
         """
         return node.get_score(node.PLAYER_2) - node.get_score(node.PLAYER_1)
 
-    def eval(self,node):
-        n =  node.get_score(node.PLAYER_1) + node.get_score(node.PLAYER_2)
+    def eval(self, node):
+        n = node.get_score(node.PLAYER_1) + node.get_score(node.PLAYER_2)
         if n < 30:
             return self.eval_early_game(node)
         elif n < 55:
-            return self.eval_early_game(node)
+            return self.eval_mid_game(node)
         else:
-            return self.eval_early_game(node)
+            return self.eval_late_game(node)
 
