@@ -1,10 +1,19 @@
-from node import Node
+from Node import Node
 
 
 class AbstractHeuristic:
     def __init__(self):
         """Contuctor method"""
+    """def eval_early_game(self,node):
 
+        pass
+    def eval_mid_game(self,node):
+
+        pass
+    def eval_late_game(self,node):
+
+        pass
+    """
     def eval(self, node):
         """Return value f(b)"""
         pass

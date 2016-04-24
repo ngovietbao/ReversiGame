@@ -13,9 +13,9 @@ class Node(object):
         """ Constructor for node class """
         self.board = deepcopy(board)
         self.parent = parent
-        global node_counter
-        node_counter += 1
-        print node_counter
+        #global node_counter
+        #node_counter += 1
+        #print(node_counter)
 
     def __eq__(self, other):
         """ Implement fast compare two state is equal or not """
