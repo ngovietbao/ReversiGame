@@ -1,7 +1,6 @@
 class AbstractSearcher:
     """ Lop truu tuong cu cac lop tim kiem"""
     _heuristic = None
-    _player = None
 
     def __init__(self, heuristic):
         """Initialize seacher"""
@@ -70,12 +69,8 @@ class AlplaBetaSearcher(AbstractSearcher):
 
         valid_moves = node.get_all_valid_moves(player)
 
-        best_value, best_move = -165, None
+        best_value, best_move = -1000, None
         for mov, new_node in valid_moves.iteritems():
-            # print 2 test
-            print mov
-            print(' has child: ')
-            # aaa
             result = self.search(new_node, depth-1, -beta, -alpha, -player)
             value = player * result[0]  # Value of this node
             if value > best_value:
