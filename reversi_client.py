@@ -27,7 +27,7 @@ class ReversiNamespace(BaseNamespace):
         print('yourturn triggered')
         board = data['board']
         move = play_reversi.make_a_move(board)
-        print board
+        print(board)
         self.emit('mymove', {'rowIdx': move['Y'], 'colIdx': move['X']})
 
     def on_errormessage(self, data):
