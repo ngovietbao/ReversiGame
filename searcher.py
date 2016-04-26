@@ -65,6 +65,9 @@ class AlplaBetaSearcher(AbstractSearcher):
 
         valid_moves = node.get_all_valid_moves(player)
 
+        if len(valid_moves) is 0:
+            return self.get_heuristic_value(node), None
+
         best_value, best_move = -1000, None
         for mov, new_node in valid_moves.iteritems():
             result = self.__search(new_node, depth - 1, -beta, -alpha, -player)
