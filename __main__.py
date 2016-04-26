@@ -1,10 +1,8 @@
 from copy import copy
 
-from abstract_heuristic import DummyHeuristic
-from node import *
+from heuristic import *
 from reversi_client import *
 from searcher import *
-from heuristic import *
 
 class ReversiClient(PlayReversi):
     map_function = {
@@ -28,7 +26,8 @@ class ReversiClient(PlayReversi):
                 temp = board[i][j]
                 board[i][j] = self.map_function[temp]
         current_node = Node(board)
-        heuristic, move = self._searcher.search(current_node, 5, -1000, 1000, self._player)
+        heuristic, move = self._searcher.search(current_node, 5, 1)
+        print move
         return {'X': move[1], 'Y': move[0]}
 
     def update_board(self, updated_board):
@@ -36,10 +35,12 @@ class ReversiClient(PlayReversi):
         super(ReversiClient, self).update_board(updated_board)
 
 
+from node_advance import *
 if __name__ == "__main__":
-    #heuristic = DummyHeuristic()
-    heuristic = heuristic()
-    begin = Node.create()
+    heuristic = DummyHeuristic()
+    # heuristic = heuristic()
+    begin = BitBoard(None)
     searcher = AlplaBetaSearcher(heuristic)
-    handler = ReversiClient(searcher, -1)
-    play(handler)
+    searcher.search(begin, 13, 1)
+    # handler = ReversiClient(searcher, -1)
+    #play(handler)

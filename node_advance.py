@@ -1,5 +1,3 @@
-from time import *
-
 from node import Node
 
 # Declare const
@@ -10,6 +8,30 @@ shift_right_mask = 72340172838076673
 inv_slm = ~shift_left_mask
 inv_srm = ~shift_right_mask
 
+# Types and constants used in the functions below
+
+m1 = 0x5555555555555555  # binary: 0101...
+m2 = 0x3333333333333333  # binary: 00110011..
+m4 = 0x0f0f0f0f0f0f0f0f  # binary:  4 zeros,  4 ones ...
+m8 = 0x00ff00ff00ff00ff  # binary:  8 zeros,  8 ones ...
+m16 = 0x0000ffff0000ffff  # binary: 16 zeros, 16 ones ...
+m32 = 0x00000000ffffffff  # binary: 32 zeros, 32 ones
+hff = 0xffffffffffffffff  # binary: all ones
+h01 = 0x0101010101010101  # the sum of 256 to the power of 0,1,2,3...
+
+
+def popcount(x):
+    """
+    Efficient methods for counting the on-bits in an integer
+    It uses 17 arithmetic operations.
+    """
+    x -= (x >> 1) & m1  # put count of each 2 bits into those 2 bits
+    x = (x & m2) + ((x >> 2) & m2)  # put count of each 4 bits into those 4 bits
+    x = (x + (x >> 4)) & m4  # put count of each 8 bits into those 8 bits
+    x += x >> 8  # put count of each 16 bits into their lowest 8 bits
+    x += x >> 16  # put count of each 32 bits into their lowest 8 bits
+    x += x >> 32  # put count of each 64 bits into their lowest 8 bits
+    return x & 0x7f
 
 def shift_left(position):
     return (position >> 1) & inv_slm
@@ -95,35 +117,6 @@ class BitBoard(Node):
     def __get_at(self, pos, player):
         return self.bitboard[player] & pos
 
-    def __init__(self, board):
-        super(BitBoard, self).__init__(board)
-
-    def get_all_valid_moves(self, player):
-        moves = {}
-        empty = ~(self.bitboard[C_PLAYER1] | self.bitboard[C_PLAYER2])
-        for d in direction.keys():
-            dmove = 0
-            candidates = self.bitboard[-player] & dilation(self.bitboard[player], d)
-            while candidates != 0:
-                dmove |= empty & dilation(candidates, d)
-                candidates = self.bitboard[-player] & dilation(candidates, d)
-            moves[d] = dmove
-        all_candidate_moves = {}
-        for keys, values in moves.iteritems():
-            if values != 0:
-                # Select a random valid move
-                # Try
-                bit2xy = self.__to_x_y(values)
-                for valid_move in bit2xy:
-                    x, y = valid_move[0], valid_move[1]
-                    flipped_square = self.__generate_flipped_squares(1 << (x * 8 + y), keys, player)
-                    bstr = self.__gererate_new_board(flipped_square, player)
-                    new_board = BitBoard(None)
-                    new_board.bitboard = bstr
-                    all_candidate_moves[(x, y)] = new_board
-
-        return all_candidate_moves
-
     def __to_x_y(self, board):
         to_x_y = []
         for i in xrange(0, 64, 8):
@@ -166,6 +159,55 @@ class BitBoard(Node):
             tostring += '\n'
         return tostring
 
+    def __init__(self, board):
+        super(BitBoard, self).__init__(board)
+
+    def get_all_valid_moves(self, player):
+        moves = {}
+        empty = ~(self.bitboard[C_PLAYER1] | self.bitboard[C_PLAYER2])
+        for d in direction.keys():
+            dmove = 0
+            candidates = self.bitboard[-player] & dilation(self.bitboard[player], d)
+            while candidates != 0:
+                dmove |= empty & dilation(candidates, d)
+                candidates = self.bitboard[-player] & dilation(candidates, d)
+            moves[d] = dmove
+        all_candidate_moves = {}
+        for keys, values in moves.iteritems():
+            if values != 0:
+                # Select a random valid move
+                # Try
+                bit2xy = self.__to_x_y(values)
+                for valid_move in bit2xy:
+                    x, y = valid_move[0], valid_move[1]
+                    flipped_square = self.__generate_flipped_squares(1 << (x * 8 + y), keys, player)
+                    bstr = self.__gererate_new_board(flipped_square, player)
+                    new_board = BitBoard(None)
+                    new_board.bitboard = bstr
+                    all_candidate_moves[(x, y)] = new_board
+
+        return all_candidate_moves
+
+    def get_at(self, row, colunm):
+        """
+        This is a method to get a square in bit board
+        Please note that this is LOW PERFORMANCE method
+        """
+        pos = self.__position(row, colunm)
+        p1, p2 = self.__get_at(pos, C_PLAYER1), self.__get_at(pos, C_PLAYER2)
+        if p1 == 0 and p2 == 0:
+            return 0
+        elif p1 != 0:
+            return C_PLAYER1
+        else:
+            return C_PLAYER2
+
+    def get_score(self, player):
+        """ Return score if a player """
+        return popcount(self.bitboard[player])
+
+
+
 
 def bitboard_tostring(bits):
     seq = '\n'
@@ -175,25 +217,40 @@ def bitboard_tostring(bits):
 
 save_board = []
 
-
+from multiprocessing import *
 def anlysis(node, depth, player):
+    print depth
     if depth <= 0:
-        save_board.append(node)
+        #save_board.append(node)
         return
-    lst = node.get_all_valid_moves(player)
 
-    for k, v in lst.iteritems():
-        # print k
-        anlysis(v, depth - 1, -player)
+    lst = node.get_all_valid_moves(player)
+    p = Pool(len(lst))
+
+    def f(x):
+        anlysis(x, depth - 1, -player)
+        return 0
+
+    p.map(f, lst.values())
+    # for k, v in lst.iteritems():
+    #    # print k
+    #    anlysis(v, depth - 1, -player)
 
 
 if __name__ == "__main__":
     print "Unit test for bitboard"
     bb = BitBoard(None)
+    print "Player 1", bb.get_score(C_PLAYER1)
+    print "Player 2", bb.get_score(C_PLAYER2)
+    print bitboard_tostring(bb.bitboard[C_PLAYER1])
+    print bb.get_at(4, 4)
+
+
     # print bb
+"""
     nb = Node.create()
     start_time = 0
-    for i in xrange(10):
+    for i in xrange(9,12):
         start_time = time()
         if i <= 7:
             anlysis(nb, i, 1)
@@ -207,8 +264,12 @@ if __name__ == "__main__":
     if bb.bitboard[1] == bb.bitboard[1] and \
                     bb.bitboard[-1] == bb.bitboard[-1]:
         print 'OK'
-    anlysis(bb, 7, 1)
-    """
+
+"""
+
+"""
+    anlysis(bb, 6, 1)
+
     dup = 0
     check = {}
     for i in xrange(len(save_board)):
@@ -218,28 +279,4 @@ if __name__ == "__main__":
                 save_board[i].bitboard[-1] == save_board[j].bitboard[-1] and not check.has_key(j):
                 check[j] = 1
                 dup +=1
-
-
-
-    print dup
-    """
-    """
-    print 'K'
-    fst = bb.get_all_valid_moves(1)
-    for k, v in fst.iteritems():
-        nn = v.get_all_valid_moves(-1)
-        for k1, v1 in nn.iteritems():
-            aa = v1.get_all_valid_moves(1)
-            #print bitboard_tostring(v1.bitboard[-1])
-            print bitboard_tostring(v1.bitboard[1]), '\n'
-            print bitboard_tostring(v1.bitboard[-1]), '\n'
-            for k2, v2 in aa.iteritems():
-                print bitboard_tostring(v2.bitboard[1]), '\n'
-                print bitboard_tostring(v2.bitboard[-1]), '\n'
-                break
-            print '~~~~'
-            break
-
-        print 'End'
-        break
-    """
+"""

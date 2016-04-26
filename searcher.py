@@ -45,24 +45,20 @@ class MinMaxSearcher(AbstractSearcher):
         # Get max value of child node
         max, moving = -165, None
         for mov, new_node in valid_moves.iteritems():
-            # print 2 test
-            #print mov
-            #print(' has child: ')
-            # aaa
             result = self.search(new_node, depth - 1, -player)
             value = player * result[0]  # Value of this node
-            #print mov
-            #print value
             if value >= max:
                 max, moving = value, mov
         # Get how to move return this node
-        #print(max)
-        #print(moving)
         return max * player, moving
 
 
 class AlplaBetaSearcher(AbstractSearcher):
-    def search(self, node, depth, alpha, beta, player):
+    def search(self, node, depth, player):
+        # Swapper function
+        return self.__search(node, depth, -1000, 1000, player)
+
+    def __search(self, node, depth, alpha, beta, player):
         """Tim theo giai thuat  minmax"""
         if depth <= 0:
             return self.get_heuristic_value(node), None
@@ -71,7 +67,7 @@ class AlplaBetaSearcher(AbstractSearcher):
 
         best_value, best_move = -1000, None
         for mov, new_node in valid_moves.iteritems():
-            result = self.search(new_node, depth-1, -beta, -alpha, -player)
+            result = self.__search(new_node, depth - 1, -beta, -alpha, -player)
             value = player * result[0]  # Value of this node
             if value > best_value:
                 best_value, best_move = value, mov
