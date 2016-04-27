@@ -166,3 +166,114 @@ class heuristic(AbstractHeuristic):
         else:
             return self.eval_late_game(node)
 
+class _heuristic():
+    def get_checking_path_value(self, node, start_x, start_y, end_x, end_y, roc, player):
+        flag = True
+        beside = True
+        point = 1;
+        if start_x < 0 or start_x >= 8 or start_y < 0 or start_y >= 8:
+            return 0
+        if roc:
+            if start_x == end_x:
+                j = start_y
+                if end_y == 0:
+                    while True:
+                        if node.board[start_x][j] == 0:
+                            break
+                        if j - 1 < 0 or node.board[start_x][j] == player:
+                            flag = False
+                            break
+                        point += 1
+                        j -= 1
+                        beside = False
+                elif end_y == 7:
+                    while True:
+                        if node.board[start_x][j] == 0:
+                            break
+                        if j + 1 >= 8 or node.board[start_x][j] == player:
+                            flag = False
+                            break
+                        point += 1
+                        j += 1
+                        beside = False
+            elif start_y == end_y:
+                i = start_x
+                if end_x == 0:
+                    while True:
+                        if node.board[i][start_y] == 0:
+                            break
+                        if i - 1 < 0 or node.board[i][start_y] == player:
+                            flag = False
+                            break
+                        point += 1
+                        i -= 1
+                        beside = False
+                elif end_x == 7:
+                    while True:
+                        if node.board[i][start_y] == 0:
+                            break
+                        if i + 1 >= 8 or node.board[i][start_y] == player:
+                            flag = False
+                            break
+                        point += 1
+                        i += 1
+                        beside = False
+        else:
+            x = 0
+            y = 0
+            if end_x == 0 and end_y == 0:
+                x = -1
+                y = -1
+            elif end_x == 7 and end_y == 0:
+                x = 1
+                y = -1
+            elif end_x == 7 and end_y == 7:
+                x = 1
+                y = 1
+            elif end_x == 0 and end_y == 7:
+                x = -1
+                y = 1
+            else:
+                return 0
+            i = start_x
+            j = start_y
+
+            while True:
+                if node.board[i][j] == 0:
+                    break
+                if (i - 1 < 0 or i + 1 >= 8) or (j - 1 < 0 or j + 1 >= 8) or node.board[i][j] == player:
+                    flag = False
+                    break
+                point += 1
+                i += x
+                j += y
+                beside = False
+
+        if flag == True and beside == False:
+            return point
+        else:
+            return 0
+
+
+    def get_value_of_men(self, node, player):
+        """Evaluate value of a chessman based on number of opponent's chessman around him [0-8]"""
+
+        point_sum = 0
+
+        for i in xrange(8):
+            for j in xrange(8):
+                if node.board[i][j] == player:
+                    point = 0
+                    # Check PLAYER_1's chessman
+                    # Check 8 path - left - right - bottom - top and 4 diagonals
+                    point += self.get_checking_path_value(node, i, j - 1, i, 0, True, player)
+                    point += self.get_checking_path_value(node, i, j + 1, i, 7, True, player)
+                    point += self.get_checking_path_value(node, i - 1, j, 0, j, True, player)
+                    point += self.get_checking_path_value(node, i + 1, j, 7, j, True, player)
+                    point += self.get_checking_path_value(node, i - 1, j - 1, 0, 0, False, player)
+                    point += self.get_checking_path_value(node, i - 1, j + 1, 0, 7, False, player)
+                    point += self.get_checking_path_value(node, i + 1, j + 1, 7, 7, False, player)
+                    point += self.get_checking_path_value(node, i + 1, j - 1, 7, 0, False, player)
+                    # Add point into point_sum
+                    point_sum += point
+        return point_sum
